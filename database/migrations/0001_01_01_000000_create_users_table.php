@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            // 'owner' = The SaaS Customer (Landlord)
+            // 'admin' = You (The Super Admin)
+            // 'tenant' = The Renter
+            $table->enum('role', ['admin', 'owner', 'tenant'])->default('owner'); 
             $table->rememberToken();
             $table->timestamps();
         });
