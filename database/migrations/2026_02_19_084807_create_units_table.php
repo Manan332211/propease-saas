@@ -13,6 +13,16 @@ return new class extends Migration
     {
         Schema::create('units', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('property_id')->constrained()->onDelete('cascade');
+            $table->string('name'); // e.g., "Apt 101" or "Villa 5"
+            $table->integer('bedrooms'); // e.g., 2
+            $table->integer('bathrooms'); // e.g., 1
+            $table->integer('area_sqft'); // Crucial for real estate value calculation
+        
+        // Status is vital for calculations (Vacancy Rates)
+        $table->enum('status', ['vacant', 'occupied', 'maintenance'])->default('vacant');
+        
+        $table->decimal('market_rent', 10, 2); // The target price
             $table->timestamps();
         });
     }
