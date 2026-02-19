@@ -13,11 +13,6 @@ return new class extends Migration
     {
         Schema::create('properties', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade'); // The Landlord
-            $table->string('name'); // e.g., "Marina Heights Tower"
-            $table->string('address');
-            $table->string('city'); // e.g., "Dubai"
-            $table->string('country'); // e.g., "UAE"
             $table->timestamps();
         });
     }
