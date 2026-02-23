@@ -16,3 +16,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tenant/dashboard', [TenantPortalController::class, 'dashboard']);
     
 });
+
+
