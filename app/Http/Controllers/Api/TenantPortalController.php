@@ -12,8 +12,6 @@ class TenantPortalController extends Controller
     {
         $user = $request->user();
 
-        // THE FIX: We use withoutGlobalScopes() to bypass the Landlord trait 
-        // because the Tenant is safely querying their own user_id.
         $tenant = Tenant::withoutGlobalScopes()
             ->where('user_id', $user->id)
             ->with(['leases' => function ($query) {
@@ -32,14 +30,18 @@ class TenantPortalController extends Controller
         return response()->json([
             'tenant_name' => $user->name,
             'contact_number' => $tenant->phone_number,
-            'active_lease' => $tenant->leases->first() ? [
-                'unit_name' => $tenant->leases->first()->unit->name,
-                'rent_amount' => $tenant->leases->first()->rent_amount,
-                'end_date' => $tenant->leases->first()->end_date->format('Y-m-d'),
-                'contract_url' => $tenant->leases->first()->document_path 
-                    ? asset('storage/' . $tenant->leases->first()->document_path) 
-                    : null,
-            ] : null,
+            // THE UPGRADE: We map through ALL active leases and return an array
+            'active_leases' => $tenant->leases->map(function ($lease) {
+                return [
+                    'id' => $lease->id, // We need an ID for React's loop key
+                    'unit_name' => $lease->unit->name,
+                    'rent_amount' => $lease->rent_amount,
+                    'end_date' => $lease->end_date->format('Y-m-d'),
+                    'contract_url' => $lease->document_path 
+                        ? asset('storage/' . $lease->document_path) 
+                        : null,
+                ];
+            })
         ]);
     }
 }
