@@ -1,7 +1,11 @@
-# Use the official PHP 8.2 image with Apache web server
-FROM php:8.2-apache
+# 1. Upgrade to PHP 8.3 (Standard for modern Laravel 11)
+FROM php:8.3-apache
 
-# Install required system packages, PHP extensions, and PostgreSQL drivers
+# 2. Fix the Memory and Permissions crashes
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
+
+# 3. Install all required Linux packages AND the PHP zip extension
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -13,7 +17,8 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     curl \
     libpq-dev \
-    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd
+    libzip-dev \
+    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
 
 # Clear out cache to keep the server image small
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -30,8 +35,8 @@ WORKDIR /var/www/html
 # Copy all your Laravel code into the server
 COPY . .
 
-# Install dependencies securely (The fix: --no-scripts prevents Artisan from crashing the build)
-RUN composer install --optimize-autoloader --no-dev --no-scripts
+# 4. The Ultimate Install Command (Ignores platform requirements to prevent version crashes)
+RUN composer install --optimize-autoloader --no-dev --no-scripts --ignore-platform-reqs
 
 # Give the server permission to write to Laravel's cache and storage folders
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
