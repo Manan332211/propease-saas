@@ -37,7 +37,7 @@ Route::get('/live-setup-database', function () {
                 'name' => 'System Admin',
                 'password' => Hash::make('password123'),
                 // Adding the role so your API login check doesn't block them later
-                'role' => 'landlord', 
+                'role' => 'admin', 
             ]
         );
 
