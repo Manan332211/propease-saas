@@ -1,11 +1,11 @@
-# 1. Upgrade to PHP 8.3 (Standard for modern Laravel 11)
+# 1. Upgrade to PHP 8.3
 FROM php:8.3-apache
 
 # 2. Fix the Memory and Permissions crashes
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV COMPOSER_MEMORY_LIMIT=-1
 
-# 3. Install all required Linux packages AND the PHP zip extension
+# 3. Install all required Linux packages AND the PHP zip & intl extensions
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -18,7 +18,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     libpq-dev \
     libzip-dev \
-    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
+    libicu-dev \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip intl
 
 # Clear out cache to keep the server image small
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -35,7 +37,7 @@ WORKDIR /var/www/html
 # Copy all your Laravel code into the server
 COPY . .
 
-# 4. The Ultimate Install Command (Ignores platform requirements to prevent version crashes)
+# 4. The Ultimate Install Command
 RUN composer install --optimize-autoloader --no-dev --no-scripts --ignore-platform-reqs
 
 # Give the server permission to write to Laravel's cache and storage folders
